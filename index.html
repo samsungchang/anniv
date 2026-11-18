@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>우리 기념일</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="우리 기념일">
+<meta name="theme-color" content="#ff4d7d">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Noto+Sans+KR:wght@400;500;700;900&family=Gowun+Batang:wght@400;700&family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 둘만 쓰는 요즘 커플 앱 — 가볍고 깨끗하고, 사진이 주인공
+   IDEA: 폰 잠금화면처럼 사진 위에 함께한 날을 크게 띄우는 홈
+   PICTURE: 커버 사진 풀블리드(또는 폴라로이드) + 큰 숫자, 아래로 카드가 겹쳐 올라옴
+   COLOUR and TYPE: 사용자가 고르는 포인트 색 1개 + 흰/먹색 바탕 / Outfit 숫자 + 고른 한글 글꼴
+   LAYOUT: 4탭(홈·기념일·앨범·꾸미기), 폰 폭 기준 한 열, 데스크톱은 가운데 520px */
+:root{color-scheme:light dark;--bg:light-dark(#f6f5f7,#0e0d10);--card:light-dark(#fff,#1a181d);--ink:light-dark(#17151a,#f3f1f5);
+--mut:light-dark(#857f8c,#9d97a5);--line:light-dark(#ece9ef,#2a272e);--ac:#ff4d7d;--on:#fff;--tint:light-dark(#ffe9ef,#2a1219);
+--kr:"Noto Sans KR";--sh:0 10px 30px -12px light-dark(rgba(40,20,40,.18),rgba(0,0,0,.6))}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--kr),system-ui,sans-serif;overflow-x:clip}
+button,input{font:inherit;color:inherit}
+.app{max-width:520px;margin:0 auto;min-height:100svh;padding-bottom:calc(110px + env(safe-area-inset-bottom));position:relative}
+html,body{overscroll-behavior-y:none}
+.view{display:none}.view.on{display:block;animation:up .35s ease}
+@keyframes up{from{opacity:0;transform:translateY(8px)}}
+@media(prefers-reduced-motion:reduce){.view.on{animation:none}}
+.num,.dd,.big{font-family:Outfit,var(--kr),sans-serif}
+/* hero */
+.hero{position:relative;height:min(76svh,700px);color:#fff;overflow:hidden;border-radius:0 0 32px 32px;background:#222}
+.frame{position:absolute;inset:0}
+.frame img{width:100%;height:100%;object-fit:cover;display:block}
+.nocov .frame{background:linear-gradient(160deg,var(--ac),#2b1420)}.nocov #cov{visibility:hidden}
+.pick{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:3;display:none}.nocov .pick{display:block}
+.polar.nocov .frame{min-height:380px}
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0,transparent 22%,transparent 45%,rgba(0,0,0,.72) 100%)}
+.top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(12px + env(safe-area-inset-top)) 18px 12px;z-index:2}
+.pill{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:7px 14px;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:#fff;cursor:pointer}
+.hb{position:absolute;left:0;right:0;bottom:0;padding:0 24px 58px;z-index:2}
+.k{margin:0;font-size:15px;opacity:.9}
+.num{font-size:clamp(72px,22vw,112px);font-weight:800;line-height:.95;letter-spacing:-3px;display:flex;align-items:baseline;gap:6px}
+.num em{font-style:normal;font-family:var(--kr);font-size:28px;font-weight:700;letter-spacing:0}
+.since{margin:6px 0 0;font-size:15px;opacity:.9}
+.msg{margin:10px 0 0;font-size:18px;font-weight:500;text-wrap:balance}
+.msg:empty{display:none}
+/* polaroid */
+.polar .hero{height:auto;background:var(--tint);color:var(--ink);border-radius:0 0 32px 32px;padding:calc(76px + env(safe-area-inset-top)) 28px 64px}
+.polar .frame{position:relative;inset:auto;background:#fff;padding:12px 12px 52px;border-radius:4px;transform:rotate(-2.5deg);box-shadow:0 24px 40px -18px rgba(0,0,0,.45);max-width:360px;margin:0 auto}
+.polar .frame img{aspect-ratio:4/5;height:auto}
+.polar .frame::after{content:attr(data-cap);position:absolute;left:0;right:0;bottom:12px;text-align:center;color:#3a3340;font-size:18px}
+.polar .shade{display:none}
+.polar .top .pill,.polar .top .ib{color:var(--ink);background:var(--card);border-color:var(--line)}
+.polar .hb{position:static;padding:28px 0 0;text-align:center}.polar .num{justify-content:center;color:var(--ac)}
+.polar .msg{display:none}
+/* cards */
+.main{padding:0 16px;margin-top:-34px;position:relative;z-index:3;display:grid;gap:14px}
+.polar .main{margin-top:-30px}
+.card{background:var(--card);border-radius:24px;padding:18px 20px;box-shadow:var(--sh)}
+.nxh{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lab{margin:0;font-size:13px;color:var(--ac);font-weight:700}
+.nx h2{margin:2px 0 0;font-size:22px;line-height:1.2}
+.nx .dd{font-size:42px;font-weight:800;color:var(--ac);line-height:1;flex:none}
+.nx p{margin:6px 0 0;font-size:14px;color:var(--mut)}
+.bar{height:8px;border-radius:9px;background:var(--line);margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:9px;transition:width 1s ease}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.st{background:var(--card);border-radius:20px;padding:14px 12px;box-shadow:var(--sh)}
+.st b{display:block;font-family:Outfit,var(--kr);font-size:20px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st span{font-size:12.5px;color:var(--mut)}
+.hd{display:flex;justify-content:space-between;align-items:center;margin:8px 4px 0}
+.hd h3{margin:0;font-size:19px}
+.more{background:none;border:0;text-decoration:none;display:flex;align-items:center;color:var(--mut);font-size:14px;cursor:pointer;min-height:44px;padding:0 4px}
+/* list */
+.list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.it{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--card);border-radius:20px;padding:12px 16px 12px 12px;box-shadow:var(--sh)}
+.cal{width:54px;height:58px;border-radius:16px;background:var(--bg);display:grid;place-content:center;text-align:center;line-height:1.1}
+.cal small{font-size:11px;color:var(--mut)}.cal b{font-family:Outfit;font-size:22px;font-weight:600}
+.it.m .cal{background:var(--ac);color:var(--on)}.it.m .cal small{color:inherit;opacity:.85}
+.it h4{margin:0;font-size:16px;font-weight:700}.it p{margin:1px 0 0;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .dd{font-size:18px;font-weight:600;white-space:nowrap}
+.it.m .dd{color:var(--ac)}
+.empty{text-align:center;color:var(--mut);padding:28px;border:2px dashed var(--line);border-radius:20px}
+/* page head */
+.ph{padding:calc(24px + env(safe-area-inset-top)) 20px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ph h1{margin:0;font-size:30px;line-height:1.1}
+.pad{padding:0 16px;display:grid;gap:12px}
+.seg{display:flex;gap:6px;overflow-x:auto;padding:2px 16px 4px;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:999px;padding:9px 16px;min-height:42px;background:var(--card);box-shadow:var(--sh);cursor:pointer;font-size:15px;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.btn{border:0;border-radius:16px;min-height:50px;padding:0 20px;background:var(--ac);color:var(--on);font-weight:700;font-size:16px;cursor:pointer}
+.btn.sm{min-height:44px;font-size:15px;border-radius:14px}
+.btn.gh{background:var(--bg);color:var(--ink)}
+.btn.rd{background:transparent;color:#e5484d}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+/* album */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:0 4px}
+.grid button{aspect-ratio:1;border:0;padding:0;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--line)}
+.grid img{width:100%;height:100%;object-fit:cover;display:block}
+.add{display:grid;place-content:center;gap:4px;color:var(--ac);font-size:13px;font-weight:700;background:var(--card)!important;box-shadow:inset 0 0 0 2px var(--line)}
+.strip{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+.strip::-webkit-scrollbar{display:none}
+.strip button{flex:none;width:96px;height:120px;border-radius:16px;overflow:hidden;border:0;padding:0;cursor:pointer;background:var(--line)}
+.strip img{width:100%;height:100%;object-fit:cover}
+/* deco */
+.sec{background:var(--card);border-radius:24px;padding:18px 18px 20px;box-shadow:var(--sh)}
+.sec h3{margin:0 0 12px;font-size:16px}
+.covrow{display:flex;gap:14px;align-items:center}
+.covrow img{width:84px;height:104px;object-fit:cover;border-radius:14px;flex:none}
+.covrow div{display:grid;gap:8px;flex:1}
+input[type=range]{width:100%;accent-color:var(--ac);height:32px}
+.sw{display:flex;gap:10px;flex-wrap:wrap}
+.sw button{width:44px;height:44px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.sw button[aria-pressed=true]{box-shadow:0 0 0 3px var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opt{border:2px solid var(--line);background:var(--bg);border-radius:16px;padding:12px;min-height:64px;cursor:pointer;text-align:left}
+.opt b{display:block;font-size:18px;font-weight:400}.opt span{font-size:12px;color:var(--mut);font-family:"Noto Sans KR"}
+.opt[aria-pressed=true]{border-color:var(--ac);background:var(--tint)}
+.fl{display:grid;gap:12px}
+label{display:grid;gap:6px;font-size:13px;color:var(--mut)}
+input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);border-radius:14px;padding:12px 14px;min-height:48px;width:100%;color:var(--ink)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tog{display:flex;justify-content:space-between;align-items:center;min-height:44px;font-size:15px;color:var(--ink)}
+.tog input{width:22px;height:22px;accent-color:var(--ac)}
+.note{font-size:12.5px;color:var(--mut);margin:4px 4px 0}
+/* nav */
+.nav{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(440px,calc(100% - 28px));display:grid;grid-template-columns:repeat(4,1fr);background:light-dark(rgba(255,255,255,.82),rgba(30,28,34,.82));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:26px;padding:6px;box-shadow:0 12px 30px -8px rgba(0,0,0,.25);z-index:20}
+.nav a{display:grid;justify-items:center;gap:2px;padding:8px 0;border-radius:20px;color:var(--mut);text-decoration:none;font-size:11.5px;font-weight:500;min-height:52px}
+.nav a.on{color:var(--ac);background:var(--tint)}
+.nav svg,.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fab{position:fixed;right:max(20px,calc(50% - 240px));bottom:calc(100px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:0;background:var(--ac);color:var(--on);box-shadow:0 12px 24px -8px var(--ac);display:grid;place-items:center;cursor:pointer;z-index:19}
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:50;display:grid;align-items:end;justify-items:center}
+.sheet[hidden]{display:none}
+.sbg{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.sbox{position:relative;width:min(520px,100%);background:var(--card);border-radius:28px 28px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));max-height:92svh;overflow:auto;animation:sl .3s ease}
+@keyframes sl{from{transform:translateY(40px);opacity:.4}}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+.sbox h3{margin:0 0 14px;font-size:20px}
+.vimg{width:100%;max-height:58svh;object-fit:contain;border-radius:18px;background:#000;display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.row .btn{flex:1}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-80px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;transition:transform .3s;z-index:60;white-space:nowrap}
+.toast.on{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- 홈 -->
+<section class="view" id="v-home">
+  <header class="hero">
+    <div class="frame" id="frame"><img id="cov" alt="커버 사진"><div class="shade"></div></div>
+    <button class="btn pick" id="pickCov">커버 사진 고르기</button>
+    <div class="top"><span class="pill" id="names">나 ♥ 너</span>
+      <a class="ib" href="#deco" aria-label="꾸미기"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></a></div>
+    <div class="hb"><p class="k">우리가 함께한 지</p><div class="num"><span id="dn">0</span><em>일</em></div>
+      <p class="since" id="since"></p><p class="msg" id="msg"></p></div>
+  </header>
+  <div class="main">
+    <div class="card nx" id="next"></div>
+    <div class="stats" id="stats"></div>
+    <div class="hd"><h3>다가오는 날</h3><a class="more" href="#days">전체 보기 ›</a></div>
+    <ul class="list" id="prev"></ul>
+    <div class="hd"><h3>우리 사진</h3><a class="more" href="#album">앨범 ›</a></div>
+    <div class="strip" id="strip"></div>
+  </div>
+</section>
+
+<!-- 기념일 -->
+<section class="view" id="v-days">
+  <div class="ph"><h1>기념일</h1></div>
+  <div class="seg" role="group" aria-label="필터">
+    <button class="chip" data-f="all" aria-pressed="true">전체</button>
+    <button class="chip" data-f="must" aria-pressed="false">꼭 챙길 날</button>
+    <button class="chip" data-f="us" aria-pressed="false">우리 기념일</button>
+    <button class="chip" data-f="day" aria-pressed="false">○○데이</button>
+  </div>
+  <div class="pad" style="margin-top:12px"><ul class="list" id="list"></ul>
+    <p class="note">앞으로 1년 안의 날짜예요. 사귄 첫날을 1일로 셉니다.</p>
+    <div class="sec"><h3>아이폰 캘린더에 알림 넣기</h3><p class="note" style="margin:0 0 12px">꼭 챙길 날을 캘린더 파일로 만들어요. 7일 전, 하루 전 오전 9시에 알림이 와요.</p>
+      <button class="btn" id="ics" style="width:100%">캘린더 파일 만들기</button></div></div>
+  <button class="fab" id="fabDay" aria-label="기념일 추가"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+</section>
+
+<!-- 앨범 -->
+<section class="view" id="v-album">
+  <div class="ph"><h1>앨범</h1><span class="note" id="pcount"></span></div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<!-- 꾸미기 -->
+<section class="view" id="v-deco">
+  <div class="ph"><h1>꾸미기</h1></div>
+  <div class="pad">
+    <div class="sec"><h3>커버 사진</h3>
+      <div class="covrow"><img id="covThumb" alt=""><div>
+        <button class="btn sm" id="btnCov">사진 바꾸기</button>
+        <label>사진 위치(위 ↔ 아래)<input type="range" id="pos" min="0" max="100"></label></div></div></div>
+    <div class="sec"><h3>홈 스타일</h3><div class="opts" id="lay">
+      <button class="opt" data-v="full"><b>꽉 찬 사진</b><span>잠금화면처럼</span></button>
+      <button class="opt" data-v="polar"><b>폴라로이드</b><span>사진 한 장 붙인 느낌</span></button></div></div>
+    <div class="sec"><h3>포인트 색</h3><div class="sw" id="sw"></div></div>
+    <div class="sec"><h3>글꼴</h3><div class="opts" id="fonts"></div></div>
+    <div class="sec"><h3>문구</h3><label>커버에 띄울 한 줄<input type="text" id="iMsg" maxlength="40" placeholder="오늘도 같이 웃자"></label></div>
+    <div class="sec"><h3>우리 정보</h3><div class="fl">
+      <div class="two"><label>내 이름<input type="text" id="iMe" placeholder="윤성"></label><label>여자친구 이름<input type="text" id="iHer" placeholder="여자친구"></label></div>
+      <label>사귄 날<input type="date" id="iStart"></label>
+      <div class="two"><label>여자친구 생일<input type="date" id="iHb"></label><label>내 생일<input type="date" id="iMb"></label></div>
+      <p class="note" id="sample">지금은 예시 날짜예요. 실제 사귄 날로 바꿔 주세요.</p>
+    </div></div>
+    <div class="sec"><h3>백업</h3><p class="note" style="margin:0 0 12px">데이터는 이 폰 안에만 있어요. 폰을 바꾸거나 앱을 지우기 전에 백업 파일을 저장해 두세요.</p>
+      <div class="two"><button class="btn sm" id="bk">백업 저장</button><button class="btn sm gh" id="rs">백업 불러오기</button></div></div>
+    <p class="note" id="store"></p>
+  </div>
+</section>
+
+<nav class="nav" aria-label="메뉴">
+  <a href="#home" data-v="home"><svg viewBox="0 0 24 24"><path d="M12 20.5s-8-4.8-8-11A4.5 4.5 0 0 1 12 6.6a4.5 4.5 0 0 1 8 2.9c0 6.2-8 11-8 11Z"/></svg>홈</a>
+  <a href="#days" data-v="days"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>기념일</a>
+  <a href="#album" data-v="album"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="9" cy="9.5" r="1.8"/><path d="m20.5 16-5-5-9 9"/></svg>앨범</a>
+  <a href="#deco" data-v="deco"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.6-.8 1.6-1.6 0-.9-.6-1.2-.6-2 0-.9.7-1.6 1.6-1.6H17a4 4 0 0 0 4-4C21 6.9 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg>꾸미기</a>
+</nav>
+</div>
+
+<div class="sheet" id="shDay" hidden><div class="sbg" data-close></div><div class="sbox">
+  <div class="grab"></div><h3>우리만의 날 추가</h3>
+  <form class="fl" id="fDay">
+    <label>이름<input type="text" id="dN" placeholder="예: 첫 여행 간 날" required></label>
+    <label>날짜<input type="date" id="dD" required></label>
+    <label class="tog">매년 반복<input type="checkbox" id="dR" checked></label>
+    <button class="btn">추가하기</button>
+  </form>
+  <div id="mine"></div>
+</div></div>
+
+<div class="sheet" id="shPh" hidden><div class="sbg" data-close></div><div class="sbox">
+  <div class="grab"></div><img class="vimg" id="vImg" alt="">
+  <div class="fl" style="margin-top:14px"><label>한 줄 메모<input type="text" id="vCap" maxlength="40" placeholder="어디서, 무슨 날"></label></div>
+  <div class="row"><button class="btn gh" id="vCover">커버로 쓰기</button><button class="btn" id="vSave">저장</button></div>
+  <div class="row"><button class="btn rd" id="vDel">사진 삭제</button></div>
+</div></div>
+
+<input type="file" id="fAlbum" accept="image/*" multiple hidden>
+<input type="file" id="fCover" accept="image/*" hidden>
+<input type="file" id="fRestore" accept=".json,application/json" hidden>
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
