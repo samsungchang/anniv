@@ -100,6 +100,28 @@ html,body{overscroll-behavior-y:none}
 .btn.gh{background:var(--bg);color:var(--ink)}
 .btn.rd{background:transparent;color:#e5484d}
 :focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+/* calendar */
+.calc{background:var(--card);border-radius:24px;padding:12px 10px 8px;box-shadow:var(--sh);margin:0 16px}
+.ch{display:flex;align-items:center;gap:6px;padding:2px 4px 6px}
+.ch b{font-size:20px;flex:1;font-family:Outfit,var(--kr)}
+.nb{width:40px;height:40px;border-radius:50%;border:0;background:var(--bg);color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:18px}
+.tdb{border:0;background:var(--bg);color:var(--ink);border-radius:999px;padding:0 12px;height:40px;font-size:13px;cursor:pointer}
+.wk,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.wk span{text-align:center;font-size:12px;color:var(--mut);padding:4px 0}
+.wk span:first-child,.dc.sun{color:#e5484d}.wk span:last-child,.dc.sat{color:#3b82f6}
+.dc{height:52px;border:0;background:none;display:grid;justify-items:center;align-content:center;gap:2px;cursor:pointer;font-family:Outfit,var(--kr);font-size:16px;color:var(--ink);padding:0;touch-action:pan-y}
+.dc.o{opacity:.28}
+.dc .n{width:34px;height:34px;display:grid;place-items:center;border-radius:50%}
+.dc.td .n{box-shadow:inset 0 0 0 2px var(--ac);color:var(--ac);font-weight:600}
+.dc.sel .n{background:var(--ac);color:var(--on);box-shadow:none}
+.dots{display:flex;gap:3px;height:5px}.dots i{width:5px;height:5px;border-radius:50%;background:var(--mut)}.dots i.m{background:var(--ac)}
+.selc{margin:12px 16px 0;background:var(--card);border-radius:22px;padding:16px 18px;box-shadow:var(--sh)}
+.selc h4{margin:0;font-size:17px}.selc .sub{margin:2px 0 10px;font-size:13px;color:var(--mut)}
+.se{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.se i{width:8px;height:8px;border-radius:50%;background:var(--mut);flex:none}.se.m i{background:var(--ac)}
+.se span{flex:1;min-width:0}.se small{display:block;color:var(--mut);font-size:12.5px}
+.se button{border:0;background:none;color:#e5484d;font-size:13px;min-height:36px;cursor:pointer}
+.selc .btn{width:100%;margin-top:8px}
 /* album */
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:0 4px}
 .grid button{aspect-ratio:1;border:0;padding:0;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--line)}
@@ -176,6 +198,13 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
 <!-- 기념일 -->
 <section class="view" id="v-days">
   <div class="ph"><h1>기념일</h1></div>
+  <div class="calc">
+    <div class="ch"><b id="calT"></b><button class="tdb" id="calTd">오늘</button><button class="nb" id="calP" aria-label="이전 달">‹</button><button class="nb" id="calN" aria-label="다음 달">›</button></div>
+    <div class="wk"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+    <div class="days" id="calD"></div>
+  </div>
+  <div class="selc" id="selc"></div>
+  <div class="hd" style="margin:22px 20px 8px"><h3>다가오는 날</h3></div>
   <div class="seg" role="group" aria-label="필터">
     <button class="chip" data-f="all" aria-pressed="true">전체</button>
     <button class="chip" data-f="must" aria-pressed="false">꼭 챙길 날</button>
@@ -230,7 +259,7 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
 </div>
 
 <div class="sheet" id="shDay" hidden><div class="sbg" data-close></div><div class="sbox">
-  <div class="grab"></div><h3>우리만의 날 추가</h3>
+  <div class="grab"></div><h3 id="dTitle">우리만의 날 추가</h3>
   <form class="fl" id="fDay">
     <label>이름<input type="text" id="dN" placeholder="예: 첫 여행 간 날" required></label>
     <label>날짜<input type="date" id="dD" required></label>

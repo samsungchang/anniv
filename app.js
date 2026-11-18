@@ -12,7 +12,7 @@ const DAYS = [[1,14,'다이어리데이','새해 다이어리 선물',0],[2,14,'
  [11,14,'무비데이','영화 데이트',0],[12,14,'허그데이','',0],[12,24,'크리스마스 이브','레스토랑은 미리 예약',1],[12,25,'크리스마스','선물 교환',1],[12,31,'연말','같이 카운트다운',0]];
 const DEF = {start:'2025-06-07',me:'',her:'',hb:'',mb:'',msg:'',custom:[],photos:[],cover:'',pos:50,theme:'rose',font:'modern',layout:'full',sample:true};
 
-let st = Object.assign({}, DEF), filter = 'all', cur = -1;
+let st = Object.assign({}, DEF), filter = 'all', cur = -1, vm = null, sel = null;
 const urls = {}; // 사진 key → object URL
 try { const s = JSON.parse(localStorage.getItem(K)); if (s) st = Object.assign({}, DEF, s); } catch (e) {}
 
@@ -25,6 +25,7 @@ const fmt = d => `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} ${WD[d.get
 const ny = (m,d,t) => { let x = new Date(t.getFullYear(), m-1, d); if (x < t) x = new Date(t.getFullYear()+1, m-1, d); return x; };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dtxt = n => n === 0 ? 'D-DAY' : 'D-' + n;
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const ymd = d => `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
 function toast(m){ const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 2000); }
 
@@ -51,16 +52,22 @@ function save(){
   try { localStorage.setItem(K, JSON.stringify(st)); } catch (e) { toast('저장 공간이 부족해요'); }
 }
 
-function events(range = 366){
-  const t = T(), end = add(t, range), S = P(st.start), ev = [], her = st.her || '여자친구', inR = d => d >= t && d <= end;
-  for (let k = 100; k <= 20000; k += 100) { const d = add(S, k-1); if (d > end) break; if (inR(d)) ev.push({d, n:`${k}일`, s:k%1000===0?'큰 숫자, 특별하게':'우리 기념일', g:'us', m:1}); }
-  for (let y = 1; y <= 60; y++) { const d = new Date(S.getFullYear()+y, S.getMonth(), S.getDate()); if (d > end) break; if (inR(d)) ev.push({d, n:`${y}주년`, s:'코스·선물 미리 준비', g:'us', m:1}); }
-  if (st.hb) { const b = P(st.hb); ev.push({d:ny(b.getMonth()+1, b.getDate(), t), n:`${her} 생일`, s:'제일 중요, 2주 전부터 준비', g:'us', m:1, yr:1}); }
-  if (st.mb) { const b = P(st.mb); ev.push({d:ny(b.getMonth()+1, b.getDate(), t), n:`${st.me||'내'} 생일`, s:'', g:'us', m:0, yr:1}); }
-  DAYS.forEach(([m,d,n,s,k]) => ev.push({d:ny(m,d,t), n, s, g:'day', m:k, yr:1}));
-  st.custom.forEach(c => { const b = P(c.d), d = c.r ? ny(b.getMonth()+1, b.getDate(), t) : b; if (inR(d)) ev.push({d, n:c.n, s:c.r?'매년 돌아오는 우리 날':'', g:'us', m:1, yr:c.r}); });
-  return ev.sort((a,b) => a.d - b.d);
+// 기간 [a, b] 안의 모든 날 계산 (달력·목록·캘린더 파일 공용)
+function evRange(a, b){
+  const S = P(st.start), ev = [], her = st.her || '여자친구', inR = d => d >= a && d <= b;
+  const yrs = []; for (let y = a.getFullYear(); y <= b.getFullYear(); y++) yrs.push(y);
+  const yearly = (m, d, o) => yrs.forEach(Y => { const x = new Date(Y, m-1, d); if (x.getMonth() === m-1 && inR(x)) ev.push(Object.assign({d:x, yr:1}, o)); });
+  if (inR(S)) ev.push({d:S, n:'우리 처음 사귄 날', s:'1일', g:'us', m:0});
+  for (let k = 100; k <= 20000; k += 100) { const d = add(S, k-1); if (d > b) break; if (inR(d)) ev.push({d, n:`${k}일`, s:k%1000===0?'큰 숫자, 특별하게':'우리 기념일', g:'us', m:1}); }
+  for (let y = 1; y <= 60; y++) { const d = new Date(S.getFullYear()+y, S.getMonth(), S.getDate()); if (d > b) break; if (inR(d)) ev.push({d, n:`${y}주년`, s:'코스·선물 미리 준비', g:'us', m:1}); }
+  if (st.hb) { const x = P(st.hb); yearly(x.getMonth()+1, x.getDate(), {n:`${her} 생일`, s:'제일 중요, 2주 전부터 준비', g:'us', m:1}); }
+  if (st.mb) { const x = P(st.mb); yearly(x.getMonth()+1, x.getDate(), {n:`${st.me||'내'} 생일`, s:'', g:'us', m:0}); }
+  DAYS.forEach(([m,d,n,s,k]) => yearly(m, d, {n, s, g:'day', m:k}));
+  st.custom.forEach((c, ci) => { const x = P(c.d), o = {n:c.n, s:c.r?'매년 돌아오는 우리 날':'우리 날', g:'us', m:1, ci};
+    if (c.r) yearly(x.getMonth()+1, x.getDate(), o); else if (inR(x)) ev.push(Object.assign({d:x}, o)); });
+  return ev.sort((p, q) => p.d - q.d);
 }
+function events(range = 366){ const t = T(); return evRange(t, add(t, range)); }
 const row = (e,t) => { const n = diff(t, e.d); return `<li class="it${e.m?' m':''}"><div class="cal"><small>${e.d.getMonth()+1}월</small><b>${e.d.getDate()}</b></div><div><h4>${esc(e.n)}</h4><p>${WD[e.d.getDay()]}요일${e.s?' · '+esc(e.s):''}</p></div><span class="dd">${dtxt(n)}</span></li>`; };
 
 function style(){
@@ -101,9 +108,30 @@ function render(){
   [['iMe','me'],['iHer','her'],['iStart','start'],['iHb','hb'],['iMb','mb'],['iMsg','msg']].forEach(([i,k]) => { if (document.activeElement !== $(i)) $(i).value = st[k]; });
   $('pos').value = st.pos; $('sample').hidden = !st.sample;
   $('mine').innerHTML = st.custom.length ? `<h3 style="margin:22px 0 6px;font-size:16px">추가한 날</h3>` + st.custom.map((c,i) => `<div class="tog"><span>${esc(c.n)} <small style="color:var(--mut)">${esc(c.d)}${c.r?' · 매년':''}</small></span><button class="btn rd sm" data-del="${i}">삭제</button></div>`).join('') : '';
+  renderCal();
   const standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
   $('store').textContent = standalone ? '모든 내용은 이 아이폰 안에 저장돼요.' : 'Safari 공유 버튼 → "홈 화면에 추가"를 하면 앱처럼 쓸 수 있어요.';
 }
+
+
+// ---- 달력 ----
+function renderCal(){
+  const t = T(); if (!sel) sel = t; if (!vm) vm = new Date(sel.getFullYear(), sel.getMonth(), 1);
+  $('calT').textContent = `${vm.getFullYear()}. ${vm.getMonth()+1}`;
+  const g0 = add(vm, -vm.getDay()), last = new Date(vm.getFullYear(), vm.getMonth()+1, 0), weeks = Math.ceil((vm.getDay() + last.getDate())/7), g1 = add(g0, weeks*7 - 1);
+  const by = {}; evRange(g0, g1).forEach(e => (by[iso(e.d)] ||= []).push(e));
+  let h = '';
+  for (let i = 0; i < weeks*7; i++) { const d = add(g0, i), k = iso(d), es = by[k] || [];
+    const c = ['dc', d.getMonth()!==vm.getMonth()?'o':'', d.getDay()===0?'sun':d.getDay()===6?'sat':'', +d===+t?'td':'', +d===+sel?'sel':''].join(' ');
+    h += `<button class="${c}" data-d="${k}" aria-label="${d.getMonth()+1}월 ${d.getDate()}일${es.length?' '+es.map(e=>e.n).join(', '):''}"><span class="n">${d.getDate()}</span><span class="dots">${es.slice(0,3).map(e=>`<i class="${e.m?'m':''}"></i>`).join('')}</span></button>`; }
+  $('calD').innerHTML = h;
+  const S = P(st.start), dn = diff(S, sel) + 1, es = by[iso(sel)] || evRange(sel, sel), dd = diff(t, sel);
+  const rel = dd === 0 ? '오늘' : dd > 0 ? `${dd}일 뒤` : `${-dd}일 전`;
+  $('selc').innerHTML = `<h4>${sel.getMonth()+1}월 ${sel.getDate()}일 ${WD[sel.getDay()]}요일</h4><p class="sub">${rel}${dn>0?` · 사귄 지 ${dn.toLocaleString()}일째`:''}</p>`
+    + (es.length ? es.map(e => `<div class="se${e.m?' m':''}"><i></i><span>${esc(e.n)}${e.s?`<small>${esc(e.s)}</small>`:''}</span>${e.ci!=null?`<button data-cdel="${e.ci}">삭제</button>`:''}</div>`).join('') : '<p class="sub" style="margin:0">등록된 날이 없어요</p>')
+    + `<button class="btn" id="selAdd">+ 이 날에 기념일 추가</button>`;
+}
+const moveMonth = n => { vm = new Date(vm.getFullYear(), vm.getMonth()+n, 1); renderCal(); };
 
 function route(){
   const v = (location.hash || '#home').slice(1), ok = ['home','days','album','deco'].includes(v) ? v : 'home';
@@ -156,8 +184,22 @@ document.querySelector('.seg').addEventListener('click', e => { const b = e.targ
 const open = id => { $(id).hidden = false; }, close = () => document.querySelectorAll('.sheet').forEach(s => s.hidden = true);
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
 addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-$('fabDay').addEventListener('click', () => open('shDay'));
-$('fDay').addEventListener('submit', e => { e.preventDefault(); const n = $('dN').value.trim(), d = $('dD').value; if (!n || !d) return; st.custom.push({n, d, r:$('dR').checked}); $('dN').value = ''; $('dD').value = ''; save(); render(); toast('추가했어요'); });
+$('fabDay').addEventListener('click', () => openAdd(sel || T()));
+$('calP').addEventListener('click', () => moveMonth(-1));
+$('calN').addEventListener('click', () => moveMonth(1));
+$('calTd').addEventListener('click', () => { sel = T(); vm = new Date(sel.getFullYear(), sel.getMonth(), 1); renderCal(); });
+$('calD').addEventListener('click', e => { const b = e.target.closest('.dc'); if (!b) return; sel = P(b.dataset.d);
+  if (sel.getMonth() !== vm.getMonth() || sel.getFullYear() !== vm.getFullYear()) vm = new Date(sel.getFullYear(), sel.getMonth(), 1); renderCal(); });
+let sx = null;
+$('calD').addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+$('calD').addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 50) moveMonth(dx < 0 ? 1 : -1); });
+const openAdd = d => { $('dD').value = iso(d); $('dTitle').textContent = `${d.getMonth()+1}월 ${d.getDate()}일에 추가`; open('shDay'); setTimeout(() => $('dN').focus(), 300); };
+$('selc').addEventListener('click', e => { if (e.target.id === 'selAdd') { openAdd(sel); return; }
+  const i = e.target.dataset.cdel; if (i == null) return;
+  if (e.target.dataset.c !== '1') { e.target.dataset.c = '1'; e.target.textContent = '정말 삭제'; return; }
+  st.custom.splice(+i, 1); save(); render(); toast('삭제했어요'); });
+
+$('fDay').addEventListener('submit', e => { e.preventDefault(); const n = $('dN').value.trim(), d = $('dD').value; if (!n || !d) return; st.custom.push({n, d, r:$('dR').checked}); $('dN').value = ''; sel = P(d); vm = new Date(sel.getFullYear(), sel.getMonth(), 1); save(); render(); close(); toast('추가했어요'); });
 $('mine').addEventListener('click', e => { const i = e.target.dataset.del; if (i == null) return; st.custom.splice(+i, 1); save(); render(); });
 const pick = e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.add) { $('fAlbum').click(); return; }
   if (b.dataset.i != null) { cur = +b.dataset.i; const p = st.photos[cur]; $('vImg').src = src(p); $('vCap').value = p.c || ''; open('shPh'); } };
