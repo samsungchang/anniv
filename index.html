@@ -122,6 +122,36 @@ html,body{overscroll-behavior-y:none}
 .se span{flex:1;min-width:0}.se small{display:block;color:var(--mut);font-size:12.5px}
 .se button{border:0;background:none;color:#e5484d;font-size:13px;min-height:36px;cursor:pointer}
 .selc .btn{width:100%;margin-top:8px}
+/* schedule */
+.dc{height:auto;min-height:62px;align-content:start;padding:3px 0 2px}
+.dc .n{width:30px;height:30px;font-size:15px}
+.lbls{display:grid;gap:2px;width:100%;padding:0 2px}
+.lb{font:500 10px/1.35 var(--kr);color:#fff;border-radius:4px;padding:0 3px;white-space:nowrap;overflow:hidden;text-align:left}
+.lbm{font:500 10px/1.2 var(--kr);color:var(--mut);text-align:left;padding-left:3px}
+.sl{margin:4px 0 2px;font-size:13px;color:var(--mut);font-weight:700}
+.si{display:flex;align-items:center;gap:10px;width:100%;padding:10px 0;border:0;border-top:1px solid var(--line);background:none;text-align:left;cursor:pointer;color:var(--ink)}
+.si .cb{width:4px;align-self:stretch;border-radius:4px;flex:none}
+.si .tm{font-family:Outfit,var(--kr);font-size:14px;font-weight:600;min-width:46px;flex:none;white-space:nowrap}
+.si span{flex:1;min-width:0}.si b{font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.si small{display:block;color:var(--mut);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
+.cats{display:flex;flex-wrap:wrap;gap:6px}
+.cat{border:2px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;min-height:40px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.cat i{width:10px;height:10px;border-radius:50%}
+.cat[aria-pressed=true]{border-color:var(--ink)}
+.dh{font-size:13px;color:var(--mut);font-weight:700;margin:10px 0 0}
+.empty2{color:var(--mut);font-size:14px;margin:6px 0 0}
+/* wish */
+.wi{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:20px;padding:12px 14px;box-shadow:var(--sh)}
+.wck{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:none;flex:none;cursor:pointer;display:grid;place-items:center;color:var(--on)}
+.wi.done .wck{background:var(--ac);border-color:var(--ac)}
+.wi.done b{text-decoration:line-through;color:var(--mut)}
+.wtx{flex:1;min-width:0;background:none;border:0;text-align:left;padding:0;cursor:pointer;color:var(--ink)}
+.wtx b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wtx small{display:block;color:var(--mut);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wl{font-size:13px;color:var(--ac);text-decoration:none;flex:none;padding:8px 4px}
+.hint{background:var(--tint);border-radius:20px;padding:14px 16px;font-size:14px}
+.hint b{color:var(--ac)}
 /* album */
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:0 4px}
 .grid button{aspect-ratio:1;border:0;padding:0;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--line)}
@@ -153,7 +183,7 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
 .tog input{width:22px;height:22px;accent-color:var(--ac)}
 .note{font-size:12.5px;color:var(--mut);margin:4px 4px 0}
 /* nav */
-.nav{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(440px,calc(100% - 28px));display:grid;grid-template-columns:repeat(4,1fr);background:light-dark(rgba(255,255,255,.82),rgba(30,28,34,.82));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:26px;padding:6px;box-shadow:0 12px 30px -8px rgba(0,0,0,.25);z-index:20}
+.nav{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(460px,calc(100% - 24px));display:grid;grid-template-columns:repeat(5,1fr);background:light-dark(rgba(255,255,255,.82),rgba(30,28,34,.82));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:26px;padding:6px;box-shadow:0 12px 30px -8px rgba(0,0,0,.25);z-index:20}
 .nav a{display:grid;justify-items:center;gap:2px;padding:8px 0;border-radius:20px;color:var(--mut);text-decoration:none;font-size:11.5px;font-weight:500;min-height:52px}
 .nav a.on{color:var(--ac);background:var(--tint)}
 .nav svg,.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -187,8 +217,9 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
   </header>
   <div class="main">
     <div class="card nx" id="next"></div>
+    <div class="card" id="today"></div>
     <div class="stats" id="stats"></div>
-    <div class="hd"><h3>다가오는 날</h3><a class="more" href="#days">전체 보기 ›</a></div>
+    <div class="hd"><h3>다가오는 기념일</h3><a class="more" href="#days">달력 ›</a></div>
     <ul class="list" id="prev"></ul>
     <div class="hd"><h3>우리 사진</h3><a class="more" href="#album">앨범 ›</a></div>
     <div class="strip" id="strip"></div>
@@ -197,15 +228,22 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
 
 <!-- 기념일 -->
 <section class="view" id="v-days">
-  <div class="ph"><h1>기념일</h1></div>
-  <div class="calc">
+  <div class="ph"><h1>달력</h1></div>
+  <div class="seg" role="group" aria-label="달력 표시" id="layer">
+    <button class="chip" data-l="all" aria-pressed="true">전체</button>
+    <button class="chip" data-l="sch" aria-pressed="false" id="layerSch">일정</button>
+    <button class="chip" data-l="ann" aria-pressed="false">기념일</button>
+  </div>
+  <div class="calc" style="margin-top:10px">
     <div class="ch"><b id="calT"></b><button class="tdb" id="calTd">오늘</button><button class="nb" id="calP" aria-label="이전 달">‹</button><button class="nb" id="calN" aria-label="다음 달">›</button></div>
     <div class="wk"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
     <div class="days" id="calD"></div>
   </div>
   <div class="selc" id="selc"></div>
-  <div class="hd" style="margin:22px 20px 8px"><h3>다가오는 날</h3></div>
-  <div class="seg" role="group" aria-label="필터">
+  <div class="hd" style="margin:22px 20px 8px"><h3 id="upSchT">다가오는 일정</h3></div>
+  <div class="pad"><div class="card" id="upSch"></div></div>
+  <div class="hd" style="margin:22px 20px 8px"><h3>다가오는 기념일</h3></div>
+  <div class="seg" role="group" aria-label="필터" id="annF">
     <button class="chip" data-f="all" aria-pressed="true">전체</button>
     <button class="chip" data-f="must" aria-pressed="false">꼭 챙길 날</button>
     <button class="chip" data-f="us" aria-pressed="false">우리 기념일</button>
@@ -213,9 +251,22 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
   </div>
   <div class="pad" style="margin-top:12px"><ul class="list" id="list"></ul>
     <p class="note">앞으로 1년 안의 날짜예요. 사귄 첫날을 1일로 셉니다.</p>
-    <div class="sec"><h3>아이폰 캘린더에 알림 넣기</h3><p class="note" style="margin:0 0 12px">꼭 챙길 날을 캘린더 파일로 만들어요. 7일 전, 하루 전 오전 9시에 알림이 와요.</p>
+    <div class="sec"><h3>아이폰 캘린더에 알림 넣기</h3><p class="note" style="margin:0 0 12px">꼭 챙길 날은 7일 전·하루 전 오전 9시에, 시간이 있는 일정은 1시간 전에 알림이 와요.</p>
+      <label class="tog" style="margin-bottom:8px"><span id="icsSchL">일정도 같이 넣기</span><input type="checkbox" id="icsSch" checked></label>
       <button class="btn" id="ics" style="width:100%">캘린더 파일 만들기</button></div></div>
-  <button class="fab" id="fabDay" aria-label="기념일 추가"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="fab" id="fabDay" aria-label="일정 추가"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+</section>
+
+<!-- 위시 -->
+<section class="view" id="v-wish">
+  <div class="ph"><h1>위시리스트</h1><span class="note" id="wcount"></span></div>
+  <div class="pad">
+    <div class="hint" id="whint"></div>
+    <ul class="list" id="wlist"></ul>
+    <div class="hd"><h3>선물한 것</h3></div>
+    <ul class="list" id="wdone"></ul>
+  </div>
+  <button class="fab" id="fabWish" aria-label="위시 추가"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
 </section>
 
 <!-- 앨범 -->
@@ -252,8 +303,9 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
 
 <nav class="nav" aria-label="메뉴">
   <a href="#home" data-v="home"><svg viewBox="0 0 24 24"><path d="M12 20.5s-8-4.8-8-11A4.5 4.5 0 0 1 12 6.6a4.5 4.5 0 0 1 8 2.9c0 6.2-8 11-8 11Z"/></svg>홈</a>
-  <a href="#days" data-v="days"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>기념일</a>
+  <a href="#days" data-v="days"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>달력</a>
   <a href="#album" data-v="album"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="9" cy="9.5" r="1.8"/><path d="m20.5 16-5-5-9 9"/></svg>앨범</a>
+  <a href="#wish" data-v="wish"><svg viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M2.5 9h19M12 9v11.5M12 9c-1.5-3.5-6-4.5-6-1.5 0 1.5 3 1.5 6 1.5Zm0 0c1.5-3.5 6-4.5 6-1.5 0 1.5-3 1.5-6 1.5Z"/></svg>위시</a>
   <a href="#deco" data-v="deco"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.6-.8 1.6-1.6 0-.9-.6-1.2-.6-2 0-.9.7-1.6 1.6-1.6H17a4 4 0 0 0 4-4C21 6.9 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg>꾸미기</a>
 </nav>
 </div>
@@ -267,6 +319,31 @@ input[type=text],input[type=date]{font-size:16px;border:0;background:var(--bg);b
     <button class="btn">추가하기</button>
   </form>
   <div id="mine"></div>
+</div></div>
+
+<div class="sheet" id="shSch" hidden><div class="sbg" data-close></div><div class="sbox">
+  <div class="grab"></div><h3 id="sTitle">일정 추가</h3>
+  <form class="fl" id="fSch">
+    <label>무슨 일정?<input type="text" id="sN" placeholder="예: 오픈 근무, 친구 약속" required maxlength="30"></label>
+    <div><p class="dh" style="margin:0 0 6px">종류</p><div class="cats" id="sCat"></div></div>
+    <div class="two"><label>날짜<input type="date" id="sD" required></label><label>시간 (비우면 종일)<input type="time" id="sT" style="font-size:16px;border:0;background:var(--bg);border-radius:14px;padding:12px 14px;min-height:48px;width:100%;color:var(--ink)"></label></div>
+    <label class="tog">매주 반복<input type="checkbox" id="sR"></label>
+    <label><span id="sEL">끝나는 날 (여러 날 일정일 때)</span><input type="date" id="sE"></label>
+    <label>메모<input type="text" id="sM" placeholder="장소, 끝나는 시간 등" maxlength="60"></label>
+    <button class="btn">저장</button>
+    <button class="btn rd" type="button" id="sDel" hidden>이 일정 삭제</button>
+  </form>
+</div></div>
+
+<div class="sheet" id="shWish" hidden><div class="sbg" data-close></div><div class="sbox">
+  <div class="grab"></div><h3 id="wTitle">갖고 싶다고 한 것</h3>
+  <form class="fl" id="fWish">
+    <label>무엇?<input type="text" id="wN" placeholder="예: 겨울 니트 머플러" required maxlength="40"></label>
+    <label>메모 (색·사이즈·브랜드)<input type="text" id="wM" placeholder="예: 베이지, 프리사이즈" maxlength="60"></label>
+    <div class="two"><label>가격<input type="text" id="wP" inputmode="numeric" placeholder="예: 59000"></label><label>링크<input type="text" id="wL" inputmode="url" autocapitalize="off" placeholder="https://"></label></div>
+    <button class="btn">저장</button>
+    <button class="btn rd" type="button" id="wDel" hidden>삭제</button>
+  </form>
 </div></div>
 
 <div class="sheet" id="shPh" hidden><div class="sbg" data-close></div><div class="sbox">

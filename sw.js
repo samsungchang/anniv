@@ -1,5 +1,5 @@
 // 오프라인에서도 열리도록 앱 파일을 캐시합니다. 파일을 고치면 VERSION을 올려 주세요.
-const VERSION = 'anniv-v2';
+const VERSION = 'anniv-v3';
 const SHELL = ['./', 'index.html', 'app.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -14,9 +14,9 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // 앱 파일: 네트워크 우선(업데이트 반영), 실패하면 캐시
+  // 앱 파일: 항상 서버에 새 버전 확인(no-cache), 오프라인이면 캐시
   if (url.origin === location.origin) {
-    e.respondWith(fetch(req).then(r => { const c = r.clone(); caches.open(VERSION).then(x => x.put(req, c)); return r; })
+    e.respondWith(fetch(req, {cache: 'no-cache'}).then(r => { const c = r.clone(); caches.open(VERSION).then(x => x.put(req, c)); return r; })
       .catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
     return;
   }
